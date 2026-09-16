@@ -13,11 +13,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   username TEXT UNIQUE NOT NULL,
   display_name TEXT,
   avatar_url TEXT,
+  banner_image TEXT,
   bio TEXT DEFAULT 'Cinema explorer on Watchers.',
   provider TEXT DEFAULT 'google',
   created_at TIMESTAMPTZ DEFAULT timezone('utc'::TEXT, NOW()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::TEXT, NOW()) NOT NULL
 );
+
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS banner_image TEXT;
 
 -- Index for fast username lookups (e.g. /profile/:username)
 CREATE INDEX IF NOT EXISTS idx_profiles_username ON public.profiles(username);
@@ -60,12 +63,12 @@ CREATE TABLE IF NOT EXISTS public.watchlist (
 CREATE INDEX IF NOT EXISTS idx_watchlist_user_id ON public.watchlist(user_id);
 CREATE INDEX IF NOT EXISTS idx_watchlist_created_at ON public.watchlist(created_at DESC);
 
--- 5. FAVORITES TABLE (Favorite movies & TV shows)
+-- 5. FAVORITES TABLE (Favorite movies, TV shows, and people)
 CREATE TABLE IF NOT EXISTS public.favorites (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   media_id INTEGER NOT NULL,
-  media_type TEXT NOT NULL CHECK (media_type IN ('movie', 'tv')),
+  media_type TEXT NOT NULL CHECK (media_type IN ('movie', 'tv', 'person')),
   title TEXT NOT NULL,
   poster_path TEXT,
   release_date TEXT,
@@ -75,6 +78,23 @@ CREATE TABLE IF NOT EXISTS public.favorites (
 );
 
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON public.favorites(user_id);
+
+-- Allow existing installations to store people in the shared favorites table.
+ALTER TABLE public.favorites DROP CONSTRAINT IF EXISTS favorites_media_type_check;
+ALTER TABLE public.favorites ADD CONSTRAINT favorites_media_type_check CHECK (media_type IN ('movie', 'tv', 'person'));
+
+-- 6. USER FOLLOWS
+CREATE TABLE IF NOT EXISTS public.follows (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  follower_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  following_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT timezone('utc'::TEXT, NOW()) NOT NULL,
+  CONSTRAINT unique_user_follow UNIQUE (follower_id, following_id),
+  CONSTRAINT prevent_self_follow CHECK (follower_id <> following_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_follows_follower_id ON public.follows(follower_id);
+CREATE INDEX IF NOT EXISTS idx_follows_following_id ON public.follows(following_id);
 
 -- 6. COMMUNITY REVIEWS TABLE
 CREATE TABLE IF NOT EXISTS public.reviews (
@@ -119,6 +139,7 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.watched ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.watchlist ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.review_votes ENABLE ROW LEVEL SECURITY;
 
@@ -177,6 +198,19 @@ CREATE POLICY "Users can insert into their favorites"
 DROP POLICY IF EXISTS "Users can delete from their favorites" ON public.favorites;
 CREATE POLICY "Users can delete from their favorites"
   ON public.favorites FOR DELETE USING (auth.uid() = user_id);
+
+-- Follows: relationships are public; users manage their own outgoing follows
+DROP POLICY IF EXISTS "Follows are viewable by everyone" ON public.follows;
+CREATE POLICY "Follows are viewable by everyone"
+  ON public.follows FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can follow from their own account" ON public.follows;
+CREATE POLICY "Users can follow from their own account"
+  ON public.follows FOR INSERT WITH CHECK (auth.uid() = follower_id);
+
+DROP POLICY IF EXISTS "Users can remove their own follows" ON public.follows;
+CREATE POLICY "Users can remove their own follows"
+  ON public.follows FOR DELETE USING (auth.uid() = follower_id);
 
 -- Reviews: Anyone can read reviews; authenticated owners can insert/update/delete
 DROP POLICY IF EXISTS "Reviews are viewable by everyone" ON public.reviews;
@@ -281,6 +315,7 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.watched;
     ALTER PUBLICATION supabase_realtime ADD TABLE public.watchlist;
     ALTER PUBLICATION supabase_realtime ADD TABLE public.favorites;
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.follows;
     ALTER PUBLICATION supabase_realtime ADD TABLE public.reviews;
     ALTER PUBLICATION supabase_realtime ADD TABLE public.review_votes;
   END IF;

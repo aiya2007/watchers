@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Search, Heart, Bookmark, User, Settings, LogOut, Sun, Moon, Menu, X, ChevronDown } from 'lucide-react';
+import { Search, Heart, Bookmark, User, Settings, LogOut, Sun, Moon, Menu, X, ChevronDown, Bell } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useModal } from '@/context/ModalContext';
@@ -169,6 +169,14 @@ export default function Navbar() {
             {/* If Logged In */}
             {user ? (
               <div className="flex items-center gap-2">
+                <Link
+                  href="/notifications"
+                  id="nav-notifications"
+                  className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  title="Notifications"
+                >
+                  <Bell className="w-5 h-5" />
+                </Link>
                 {/* Favorites Heart Icon */}
                 <Link
                   href={`/profile/${user.username}?tab=favorites`}

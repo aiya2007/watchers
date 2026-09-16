@@ -11,9 +11,9 @@ import {
   MessageSquare,
   ThumbsUp,
   ThumbsDown,
-  Calendar,
-  Eye,
   Settings,
+  UserPlus,
+  UserCheck,
 } from 'lucide-react';
 import MediaCard from './MediaCard';
 import { useMedia } from '@/context/MediaContext';
@@ -31,6 +31,9 @@ import {
   fetchUserWatchlistDB,
   fetchUserWatchedDB,
   fetchReviewsDB,
+  fetchFollowStatsDB,
+  toggleFollowDB,
+  FollowStats,
 } from '@/lib/supabase';
 
 interface UserProfileViewProps {
@@ -38,6 +41,7 @@ interface UserProfileViewProps {
 }
 
 type ProfileTab = 'favorites' | 'watched' | 'watchlist' | 'reviews';
+type FavoriteFilter = 'movie' | 'tv' | 'person';
 
 export default function UserProfileView({ username }: UserProfileViewProps) {
   const { user: authUser } = useAuth();
@@ -59,6 +63,8 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
   const [dbWatchlist, setDbWatchlist] = useState<WatchlistItem[] | null>(null);
   const [dbWatchedLog, setDbWatchedLog] = useState<WatchedItem[] | null>(null);
   const [dbReviews, setDbReviews] = useState<ReviewItem[] | null>(null);
+  const [followStats, setFollowStats] = useState<FollowStats>({ followers: 0, following: 0, isFollowing: false });
+  const [favoriteFilter, setFavoriteFilter] = useState<FavoriteFilter>('movie');
 
   useEffect(() => {
     if (!isCurrentUser) {
@@ -74,16 +80,18 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
           if (prof) {
             setDbProfile(prof);
             setProfileNotFound(false);
-            const [favs, wl, watched, revs] = await Promise.all([
+            const [favs, wl, watched, revs, stats] = await Promise.all([
               fetchUserFavoritesDB(prof.id),
               fetchUserWatchlistDB(prof.id),
               fetchUserWatchedDB(prof.id),
               fetchReviewsDB({ username: prof.username }),
+              fetchFollowStatsDB(prof.id, authUser?.id),
             ]);
             setDbFavorites(favs || []);
             setDbWatchlist(wl || []);
             setDbWatchedLog(watched || []);
             setDbReviews(revs || []);
+            setFollowStats(stats);
           } else {
             setProfileNotFound(true);
           }
@@ -95,7 +103,12 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
           setIsLoadingProfile(false);
         });
     }
-  }, [username, isCurrentUser]);
+  }, [username, isCurrentUser, authUser?.id]);
+
+  useEffect(() => {
+    if (!isCurrentUser || !authUser?.id) return;
+    fetchFollowStatsDB(authUser.id, authUser.id).then(setFollowStats);
+  }, [isCurrentUser, authUser?.id]);
 
   if (!isCurrentUser && isLoadingProfile) {
     return (
@@ -133,6 +146,10 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
     ? authUser?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'
     : dbProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
 
+  const bannerImage = isCurrentUser
+    ? authUser?.banner_image || 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1800&q=80'
+    : dbProfile?.banner_image || 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1800&q=80';
+
   const provider = isCurrentUser
     ? authUser?.provider || 'google'
     : dbProfile?.provider || 'google';
@@ -148,12 +165,47 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
   const userReviews = isCurrentUser
     ? (authUser?.username ? myReviews.filter(r => r.username.toLowerCase() === authUser.username.toLowerCase()) : [])
     : (dbReviews || []);
+  const movieFavorites = favorites.filter(item => item.media_type === 'movie');
+  const tvFavorites = favorites.filter(item => item.media_type === 'tv');
+  const peopleFavorites = favorites.filter(item => item.media_type === 'person');
+  const visibleFavorites = favoriteFilter === 'movie' ? movieFavorites : favoriteFilter === 'tv' ? tvFavorites : peopleFavorites;
+
+  const handleFollow = async () => {
+    if (!authUser || isCurrentUser || !dbProfile) return;
+    const nextFollowing = !followStats.isFollowing;
+    setFollowStats(prev => ({
+      ...prev,
+      isFollowing: nextFollowing,
+      followers: prev.followers + (nextFollowing ? 1 : -1),
+    }));
+    const saved = await toggleFollowDB(authUser.id, dbProfile.id, nextFollowing);
+    if (!saved) {
+      setFollowStats(prev => ({
+        ...prev,
+        isFollowing: !nextFollowing,
+        followers: prev.followers + (nextFollowing ? -1 : 1),
+      }));
+    }
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-8">
-      {/* Profile Header Card */}
-      <div className="p-6 sm:p-8 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-6">
-        <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-zinc-200 dark:border-zinc-700 flex-shrink-0 bg-zinc-800 shadow-md">
+    <div className="w-full pb-10">
+      <div className="relative w-full h-[280px] sm:h-[360px] lg:h-[420px] bg-zinc-200 dark:bg-zinc-950 overflow-hidden">
+        <Image
+          src={bannerImage}
+          alt={`${profileName} profile banner`}
+          fill
+          priority
+          className="object-cover object-center opacity-70 dark:opacity-60"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-50 via-zinc-50/50 to-transparent dark:from-zinc-950 dark:via-zinc-950/45 dark:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-50/60 via-transparent to-transparent dark:from-zinc-950/60 dark:via-transparent dark:to-transparent" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 sm:-mt-24 relative z-10">
+        <div className="flex flex-col sm:flex-row items-start gap-6">
+          <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-zinc-50 dark:border-zinc-950 flex-shrink-0 bg-zinc-800 shadow-2xl">
           <Image
             src={avatarUrl}
             alt={username}
@@ -161,10 +213,10 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
             className="object-cover"
             referrerPolicy="no-referrer"
           />
-        </div>
+          </div>
 
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex-1 min-w-0 pt-16 sm:pt-14 space-y-3">
+            <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 capitalize">
               {profileName}
             </h1>
@@ -173,54 +225,43 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
               via {provider}
             </span>
 
-            {isCurrentUser && (
+              {isCurrentUser && (
               <Link
                 href="/settings"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition-colors ml-auto sm:ml-2"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-sm font-semibold text-zinc-700 dark:text-zinc-300 transition-colors ml-auto sm:ml-2"
               >
                 <Settings className="w-3.5 h-3.5" />
                 <span>Edit Profile</span>
               </Link>
-            )}
-          </div>
+              )}
+              {!isCurrentUser && authUser && (
+              <button
+                type="button"
+                onClick={handleFollow}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ml-auto sm:ml-2 ${
+                  followStats.isFollowing
+                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {followStats.isFollowing ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                {followStats.isFollowing ? 'Following' : 'Follow'}
+              </button>
+              )}
+            </div>
 
-          {bio ? <p className="text-sm text-zinc-600 dark:text-zinc-300 max-w-2xl">{bio}</p> : null}
+            {bio ? <p className="text-sm text-zinc-600 dark:text-zinc-300 max-w-2xl">{bio}</p> : null}
 
-          <div className="flex items-center gap-6 pt-2 text-xs text-zinc-500">
-            <div className="flex items-center gap-1.5">
-              <Eye className="w-4 h-4 text-zinc-400" />
-              <span>
-                <strong className="text-zinc-900 dark:text-zinc-100">{watchedLog.length}</strong>{' '}
-                Watched
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Heart className="w-4 h-4 text-rose-500" />
-              <span>
-                <strong className="text-zinc-900 dark:text-zinc-100">{favorites.length}</strong>{' '}
-                Favorites
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Bookmark className="w-4 h-4 text-amber-500" />
-              <span>
-                <strong className="text-zinc-900 dark:text-zinc-100">{watchlist.length}</strong>{' '}
-                Watchlist
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <MessageSquare className="w-4 h-4 text-blue-500" />
-              <span>
-                <strong className="text-zinc-900 dark:text-zinc-100">{userReviews.length}</strong>{' '}
-                Reviews
-              </span>
+            <div className="flex items-center gap-4 text-xs text-zinc-500">
+              <span><strong className="text-zinc-900 dark:text-zinc-100">{followStats.followers}</strong> Followers</span>
+              <span><strong className="text-zinc-900 dark:text-zinc-100">{followStats.following}</strong> Following</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2 overflow-x-auto no-scrollbar">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2 overflow-x-auto no-scrollbar">
         {[
           { id: 'favorites', label: 'Favorites', icon: Heart, count: favorites.length },
           { id: 'watched', label: 'Recently Watched', icon: CheckCircle2, count: watchedLog.length },
@@ -249,13 +290,40 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
       </div>
 
       {/* Tab Content */}
-      <div className="pt-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         {/* FAVORITES TAB */}
         {activeTab === 'favorites' && (
           <div>
-            {favorites.length > 0 ? (
+            <div className="flex items-center gap-2 mb-5 border-zinc-200 dark:border-zinc-800 pb-2">
+              {[
+                { id: 'movie' as const, label: 'Movies', count: movieFavorites.length },
+                { id: 'tv' as const, label: 'TV Shows', count: tvFavorites.length },
+                { id: 'person' as const, label: 'People', count: peopleFavorites.length },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setFavoriteFilter(tab.id)}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-md ${favoriteFilter === tab.id ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              ))}
+            </div>
+            {visibleFavorites.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
-                {favorites.map(item => {
+                {visibleFavorites.map(item => {
+                  if (item.media_type === 'person') {
+                    return (
+                      <Link key={`person-${item.media_id}`} href={`/people/${item.media_id}`} className="group space-y-2">
+                        <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
+                          {item.poster_path ? <Image src={item.poster_path} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform" referrerPolicy="no-referrer" /> : null}
+                        </div>
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{item.title}</p>
+                        <p className="text-[10px] uppercase font-bold text-zinc-500">Person</p>
+                      </Link>
+                    );
+                  }
                   const mediaItem: MediaItem = {
                     id: item.media_id,
                     media_type: item.media_type,

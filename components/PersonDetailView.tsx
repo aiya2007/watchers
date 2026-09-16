@@ -3,19 +3,34 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { User, ArrowUpDown, Calendar, MapPin, Briefcase } from 'lucide-react';
+import { User, ArrowUpDown, Calendar, MapPin, Briefcase, Heart } from 'lucide-react';
 import { PersonItem, FilmographyCredit } from '@/lib/types';
 import HorizontalShelf from './HorizontalShelf';
+import { useAuth } from '@/context/AuthContext';
+import { useMedia } from '@/context/MediaContext';
+import { useModal } from '@/context/ModalContext';
 
 interface PersonDetailViewProps {
   person: PersonItem;
 }
 
 export default function PersonDetailView({ person }: PersonDetailViewProps) {
+  const { user } = useAuth();
+  const { isPersonFavorite, togglePersonFavorite } = useMedia();
+  const { openAuthPrompt } = useModal();
   const [sortKey, setSortKey] = useState<'date' | 'popularity'>('date');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [filterType, setFilterType] = useState<'all' | 'movie' | 'tv'>('all');
   const [bioExpanded, setBioExpanded] = useState(false);
+  const favorited = isPersonFavorite(person.id);
+
+  const handleFavorite = () => {
+    if (!user) {
+      openAuthPrompt('Sign in to save actors, directors, and other people to your favorites.');
+      return;
+    }
+    togglePersonFavorite(person);
+  };
 
   // Sorting filmography
   const rawFilmography: FilmographyCredit[] = (person.filmography && person.filmography.length > 0)
@@ -102,6 +117,14 @@ export default function PersonDetailView({ person }: PersonDetailViewProps) {
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
               {person.name}
             </h1>
+            <button
+              type="button"
+              onClick={handleFavorite}
+              className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-md border transition-colors ${favorited ? 'bg-rose-600 border-rose-500 text-white' : 'border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+            >
+              <Heart className={`w-4 h-4 ${favorited ? 'fill-white' : ''}`} />
+              {favorited ? 'Favorited' : 'Favorite'}
+            </button>
           </div>
 
           {/* Quick facts */}

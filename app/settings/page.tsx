@@ -59,12 +59,15 @@ export default function SettingsPage() {
   const { user, isLoading, updateProfile } = useAuth();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarPreview, setAvatarPreview] = useState('');
+  const [bannerImage, setBannerImage] = useState('');
+  const [bannerPreview, setBannerPreview] = useState('');
   
   const [isUploadingImgBB, setIsUploadingImgBB] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -79,12 +82,19 @@ export default function SettingsPage() {
       setBio(user.bio || '');
       setAvatarUrl(user.avatar_url || '');
       setAvatarPreview(user.avatar_url || '');
+      setBannerImage(user.banner_image || '');
+      setBannerPreview(user.banner_image || '');
     }
   }, [user]);
 
   const handleAvatarUrlChange = (url: string) => {
     setAvatarUrl(url);
     setAvatarPreview(url);
+  };
+
+  const handleBannerUrlChange = (url: string) => {
+    setBannerImage(url);
+    setBannerPreview(url);
   };
 
   // Upload image to ImgBB via our secure API route
@@ -141,6 +151,38 @@ export default function SettingsPage() {
     }
   };
 
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 16 * 1024 * 1024) {
+      setErrorMsg('Image size must be less than 16MB.');
+      return;
+    }
+
+    const localPreview = URL.createObjectURL(file);
+    setBannerPreview(localPreview);
+    setIsUploadingImgBB(true);
+    setErrorMsg(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to upload banner image.');
+      setBannerImage(data.url);
+      setBannerPreview(data.url);
+      setSuccessMsg('Profile banner uploaded to ImgBB successfully!');
+      setTimeout(() => setSuccessMsg(null), 4000);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Error uploading banner image.');
+      setBannerPreview(bannerImage);
+    } finally {
+      setIsUploadingImgBB(false);
+      if (bannerInputRef.current) bannerInputRef.current.value = '';
+    }
+  };
+
   const handleRandomizeAvatar = () => {
     const randomSeed = Math.random().toString(36).substring(7);
     const generated = `https://api.dicebear.com/7.x/bottts/svg?seed=${randomSeed}`;
@@ -165,6 +207,7 @@ export default function SettingsPage() {
     setIsSaving(true);
     try {
       const finalAvatar = avatarUrl.trim() || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+      const finalBanner = bannerImage.trim();
       const finalDisplayName = displayName.trim() || cleanUsername;
       const finalBio = bio.trim();
 
@@ -173,6 +216,7 @@ export default function SettingsPage() {
         display_name: finalDisplayName,
         bio: finalBio,
         avatar_url: finalAvatar,
+        banner_image: finalBanner,
       });
 
       if (success) {
@@ -236,7 +280,7 @@ export default function SettingsPage() {
             Profile Settings
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Manage your public identity, ImgBB-hosted profile picture, display name, and bio.
+            Manage your public identity, ImgBB-hosted profile and banner images, display name, and bio.
           </p>
         </div>
 
@@ -357,6 +401,54 @@ export default function SettingsPage() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+          <div className="space-y-3 border-t border-zinc-100 dark:border-zinc-800 pt-6">
+            <div>
+              <label htmlFor="banner-image-input" className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Profile Banner Image
+              </label>
+              <p className="text-[11px] text-zinc-400 mt-1">Choose a wide image for the top of your public profile.</p>
+            </div>
+            <div className="relative h-36 sm:h-44 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800">
+              {bannerPreview ? (
+                <Image
+                  src={bannerPreview}
+                  alt="Profile banner preview"
+                  fill
+                  className="object-cover"
+                  unoptimized={bannerPreview.startsWith('blob:') || bannerPreview.startsWith('data:')}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center text-xs text-zinc-400">No banner selected</div>
+              )}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                id="banner-image-input"
+                type="url"
+                value={bannerImage.startsWith('blob:') ? '' : bannerImage}
+                onChange={(e) => handleBannerUrlChange(e.target.value)}
+                placeholder="https://i.ibb.co/... or https://..."
+                className="flex-1 px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/60 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+              />
+              <input
+                type="file"
+                ref={bannerInputRef}
+                onChange={handleBannerUpload}
+                accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
+                className="hidden"
+              />
+              <button
+                type="button"
+                disabled={isUploadingImgBB}
+                onClick={() => bannerInputRef.current?.click()}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-semibold text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 disabled:opacity-50"
+              >
+                <Upload className="w-3.5 h-3.5 text-blue-500" />
+                Upload Banner
+              </button>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

@@ -32,6 +32,8 @@ interface MediaContextType {
   toggleWatchlist: (media: MediaItem) => void;
   isFavorite: (mediaId: number, mediaType: 'movie' | 'tv') => boolean;
   toggleFavorite: (media: MediaItem) => void;
+  isPersonFavorite: (personId: number) => boolean;
+  togglePersonFavorite: (person: { id: number; name: string; profile_path: string | null }) => void;
   isWatched: (mediaId: number, mediaType: 'movie' | 'tv') => boolean;
   getWatchedItem: (mediaId: number, mediaType: 'movie' | 'tv') => WatchedItem | undefined;
   logWatched: (media: MediaItem, rating: number, watchedDate: string, reviewText?: string) => void;
@@ -287,6 +289,32 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const isPersonFavorite = (personId: number) => {
+    return favorites.some(item => item.media_id === personId && item.media_type === 'person');
+  };
+
+  const togglePersonFavorite = (person: { id: number; name: string; profile_path: string | null }) => {
+    if (!user) return;
+    const exists = isPersonFavorite(person.id);
+    if (exists) {
+      setFavorites(prev => prev.filter(item => !(item.media_id === person.id && item.media_type === 'person')));
+      removeFromFavoritesDB(user.id, person.id, 'person');
+      return;
+    }
+
+    const newItem: FavoriteItem = {
+      id: 'fav_person_' + Date.now(),
+      media_id: person.id,
+      media_type: 'person',
+      title: person.name,
+      poster_path: person.profile_path || '',
+      user_id: user.id,
+      created_at: new Date().toISOString(),
+    };
+    setFavorites(prev => [newItem, ...prev]);
+    addToFavoritesDB(newItem);
+  };
+
   const isWatched = (mediaId: number, mediaType: 'movie' | 'tv') => {
     return watchedLog.some(item => item.media_id === mediaId && item.media_type === mediaType);
   };
@@ -445,6 +473,8 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
         toggleWatchlist,
         isFavorite,
         toggleFavorite,
+        isPersonFavorite,
+        togglePersonFavorite,
         isWatched,
         getWatchedItem,
         logWatched,
