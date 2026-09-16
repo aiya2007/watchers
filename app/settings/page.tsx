@@ -267,21 +267,13 @@ export default function SettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Section 1: Profile Picture with ImgBB Integration */}
+
+        {/* Section 2: Personal Identity */}
         <div className="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 shadow-xs space-y-6">
-          <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
-            <div className="flex items-center gap-2">
-              <Camera className="w-5 h-5 text-amber-500" />
-              <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                Profile Picture
-              </h2>
-            </div>
-            {isImgBBHosted && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                <Cloud className="w-3 h-3" />
-                Hosted on ImgBB
-              </span>
-            )}
+          <div className="flex items-center gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              Personal Information
+            </h2>
           </div>
 
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -355,30 +347,20 @@ export default function SettingsPage() {
                   {isUploadingImgBB ? (
                     <>
                       <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
-                      <span>Uploading to ImgBB...</span>
+                      <span>Uploading</span>
                     </>
                   ) : (
                     <>
                       <Upload className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Upload to ImgBB</span>
+                      <span>Upload from Computer</span>
                     </>
                   )}
                 </button>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Section 2: Personal Identity */}
-        <div className="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 shadow-xs space-y-6">
-          <div className="flex items-center gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800">
-            <User className="w-5 h-5 text-amber-500" />
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-              Personal Information
-            </h2>
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            
             {/* Display Name */}
             <div className="space-y-1.5">
               <label
