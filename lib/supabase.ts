@@ -22,6 +22,7 @@ export interface UserProfile {
   username: string;
   display_name: string;
   avatar_url: string;
+  banner_image?: string;
   bio: string;
   provider: 'email' | 'discord' | 'google' | 'demo' | string;
   created_at: string;
@@ -58,13 +59,35 @@ export interface WatchlistItem {
 export interface FavoriteItem {
   id: string;
   media_id: number;
-  media_type: 'movie' | 'tv';
+  media_type: 'movie' | 'tv' | 'person';
   title: string;
   poster_path: string;
   release_date?: string;
   vote_average?: number;
   user_id: string;
   created_at: string;
+}
+
+export interface FollowStats {
+  followers: number;
+  following: number;
+  isFollowing: boolean;
+}
+
+export interface ActivityItem {
+  id: string;
+  type: 'review' | 'watched';
+  user_id: string;
+  username: string;
+  display_name?: string;
+  user_avatar?: string;
+  media_id: number;
+  media_type: 'movie' | 'tv';
+  media_title: string;
+  content?: string;
+  rating?: number;
+  created_at: string;
+  watched_date?: string;
 }
 
 export interface ReviewItem {
@@ -106,6 +129,7 @@ export async function fetchUserProfileDB(usernameOrId: string): Promise<UserProf
       username: data.username,
       display_name: data.display_name || data.username,
       avatar_url: data.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      banner_image: data.banner_image || '',
       bio: data.bio || '',
       provider: data.provider || 'google',
       created_at: data.created_at,
@@ -126,6 +150,7 @@ export async function upsertUserProfileDB(profile: Partial<UserProfile> & { id: 
         username: profile.username,
         display_name: profile.display_name || profile.username,
         avatar_url: profile.avatar_url,
+        banner_image: profile.banner_image,
         bio: profile.bio,
         provider: profile.provider,
         updated_at: new Date().toISOString(),
@@ -269,7 +294,7 @@ export async function addToFavoritesDB(item: Omit<FavoriteItem, 'id'>): Promise<
   }
 }
 
-export async function removeFromFavoritesDB(userId: string, mediaId: number, mediaType: 'movie' | 'tv'): Promise<boolean> {
+export async function removeFromFavoritesDB(userId: string, mediaId: number, mediaType: 'movie' | 'tv' | 'person'): Promise<boolean> {
   if (!supabase) return false;
   try {
     const { error } = await supabase
@@ -282,6 +307,96 @@ export async function removeFromFavoritesDB(userId: string, mediaId: number, med
   } catch (err) {
     console.warn('[Supabase] removeFromFavorites error:', err);
     return false;
+  }
+}
+
+export async function fetchFollowStatsDB(profileId: string, viewerId?: string): Promise<FollowStats> {
+  if (!supabase) return { followers: 0, following: 0, isFollowing: false };
+  try {
+    const [{ count: followers }, { count: following }, followingResult] = await Promise.all([
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profileId),
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profileId),
+      viewerId
+        ? supabase.from('follows').select('id').eq('follower_id', viewerId).eq('following_id', profileId).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+    ]);
+    return { followers: followers || 0, following: following || 0, isFollowing: Boolean(followingResult.data) };
+  } catch {
+    return { followers: 0, following: 0, isFollowing: false };
+  }
+}
+
+export async function toggleFollowDB(followerId: string, followingId: string, shouldFollow: boolean): Promise<boolean> {
+  if (!supabase || followerId === followingId) return false;
+  try {
+    if (shouldFollow) {
+      const { error } = await supabase.from('follows').upsert(
+        { follower_id: followerId, following_id: followingId },
+        { onConflict: 'follower_id,following_id' }
+      );
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from('follows').delete().match({ follower_id: followerId, following_id: followingId });
+      if (error) throw error;
+    }
+    return true;
+  } catch (err) {
+    console.warn('[Supabase] toggleFollow error:', err);
+    return false;
+  }
+}
+
+export async function fetchFollowingActivityDB(userId: string): Promise<ActivityItem[]> {
+  if (!supabase) return [];
+  try {
+    const { data: follows, error: followsError } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', userId);
+    if (followsError) throw followsError;
+    const ids = (follows || []).map(follow => follow.following_id);
+    if (ids.length === 0) return [];
+
+    const [{ data: reviews, error: reviewsError }, { data: watched, error: watchedError }] = await Promise.all([
+      supabase.from('reviews').select('*').in('user_id', ids).order('created_at', { ascending: false }).limit(50),
+      supabase.from('watched').select('*').in('user_id', ids).order('created_at', { ascending: false }).limit(50),
+    ]);
+    if (reviewsError) throw reviewsError;
+    if (watchedError) throw watchedError;
+
+    return [
+      ...(reviews || []).map(review => ({
+        id: `review-${review.id}`,
+        type: 'review' as const,
+        user_id: review.user_id,
+        username: review.username,
+        display_name: review.display_name,
+        user_avatar: review.user_avatar,
+        media_id: review.media_id,
+        media_type: review.media_type,
+        media_title: review.media_title,
+        content: review.content,
+        rating: Number(review.rating),
+        created_at: review.created_at,
+        watched_date: review.watched_date,
+      })),
+      ...(watched || []).filter(item => !item.review).map(item => ({
+        id: `watched-${item.id}`,
+        type: 'watched' as const,
+        user_id: item.user_id,
+        username: item.username,
+        media_id: item.media_id,
+        media_type: item.media_type,
+        media_title: item.title,
+        content: item.review,
+        rating: Number(item.rating),
+        created_at: item.created_at,
+        watched_date: item.watched_date,
+      })),
+    ].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  } catch (err) {
+    console.warn('[Supabase] fetchFollowingActivity error:', err);
+    return [];
   }
 }
 

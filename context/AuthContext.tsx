@@ -309,6 +309,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           username: updated.username,
           display_name: updated.display_name,
           avatar_url: updated.avatar_url,
+          banner_image: updated.banner_image,
           bio: updated.bio,
           provider: updated.provider,
         });
@@ -319,6 +320,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             username: updated.username,
             display_name: updated.display_name,
             avatar_url: updated.avatar_url,
+            banner_image: updated.banner_image,
             bio: updated.bio,
           },
         }).catch(() => {});
