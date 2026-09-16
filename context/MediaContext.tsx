@@ -42,15 +42,47 @@ interface MediaContextType {
 
 const MediaContext = createContext<MediaContextType | undefined>(undefined);
 
-// Helper to identify and purge any historical dummy/mock reviews
+// Helper to filter out any historical dummy items
 function isDummyReview(r: any): boolean {
   if (!r) return true;
   const id = String(r.id || '');
   const userId = String(r.user_id || '');
   const username = String(r.username || '').toLowerCase();
-  if (id.startsWith('rev-10') || id.startsWith('rev_dummy') || id.startsWith('rev-sample') || id === 'rev-101' || id === 'rev-102' || id === 'rev-103' || id === 'rev-104' || id === 'rev-105') return true;
-  if (userId.startsWith('usr_cinephile') || userId.startsWith('usr_sarah') || userId.startsWith('usr_marcus') || userId.startsWith('usr_elena') || userId.startsWith('usr_david') || userId.startsWith('usr_chloe') || userId.startsWith('usr_google_') || userId.startsWith('usr_discord_')) return true;
-  if (['cinephile_alex', 'sarah_watches', 'marcus_stream', 'elena_cinema', 'david_noir', 'chloe_indie', 'google_cinephile', 'pixel_director'].includes(username)) return true;
+  if (
+    id.startsWith('rev-10') ||
+    id.startsWith('rev_dummy') ||
+    id.startsWith('rev-sample') ||
+    id === 'rev-101' ||
+    id === 'rev-102' ||
+    id === 'rev-103' ||
+    id === 'rev-104' ||
+    id === 'rev-105'
+  )
+    return true;
+  if (
+    userId.startsWith('usr_cinephile') ||
+    userId.startsWith('usr_sarah') ||
+    userId.startsWith('usr_marcus') ||
+    userId.startsWith('usr_elena') ||
+    userId.startsWith('usr_david') ||
+    userId.startsWith('usr_chloe') ||
+    userId.startsWith('usr_google_') ||
+    userId.startsWith('usr_discord_')
+  )
+    return true;
+  if (
+    [
+      'cinephile_alex',
+      'sarah_watches',
+      'marcus_stream',
+      'elena_cinema',
+      'david_noir',
+      'chloe_indie',
+      'google_cinephile',
+      'pixel_director',
+    ].includes(username)
+  )
+    return true;
   return false;
 }
 
@@ -58,140 +90,119 @@ function isDummyUserItem(item: any): boolean {
   if (!item) return true;
   const userId = String(item.user_id || '');
   const username = String(item.username || '').toLowerCase();
-  if (userId.startsWith('usr_cinephile') || userId.startsWith('usr_sarah') || userId.startsWith('usr_marcus') || userId.startsWith('usr_elena') || userId.startsWith('usr_david') || userId.startsWith('usr_chloe') || userId.startsWith('usr_google_') || userId.startsWith('usr_discord_')) return true;
-  if (['cinephile_alex', 'sarah_watches', 'marcus_stream', 'elena_cinema', 'david_noir', 'chloe_indie', 'google_cinephile', 'pixel_director'].includes(username)) return true;
+  if (
+    userId.startsWith('usr_cinephile') ||
+    userId.startsWith('usr_sarah') ||
+    userId.startsWith('usr_marcus') ||
+    userId.startsWith('usr_elena') ||
+    userId.startsWith('usr_david') ||
+    userId.startsWith('usr_chloe') ||
+    userId.startsWith('usr_google_') ||
+    userId.startsWith('usr_discord_')
+  )
+    return true;
+  if (
+    [
+      'cinephile_alex',
+      'sarah_watches',
+      'marcus_stream',
+      'elena_cinema',
+      'david_noir',
+      'chloe_indie',
+      'google_cinephile',
+      'pixel_director',
+    ].includes(username)
+  )
+    return true;
   return false;
 }
 
 export function MediaProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
-  // Pure real state initialized as empty arrays
+  // Pure state sourced directly from database
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [watchedLog, setWatchedLog] = useState<WatchedItem[]>([]);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
 
-  // Load from localStorage and Supabase on mount / user change
+  // Purge any legacy localStorage cache keys from earlier versions
   useEffect(() => {
     try {
-      const savedWatchlist = localStorage.getItem('watchers_watchlist');
-      if (savedWatchlist) {
-        const parsed = JSON.parse(savedWatchlist);
-        if (Array.isArray(parsed)) {
-          const cleaned = parsed.filter(i => !isDummyUserItem(i));
-          setWatchlist(cleaned);
-          localStorage.setItem('watchers_watchlist', JSON.stringify(cleaned));
-        }
-      }
-
-      const savedFavorites = localStorage.getItem('watchers_favorites');
-      if (savedFavorites) {
-        const parsed = JSON.parse(savedFavorites);
-        if (Array.isArray(parsed)) {
-          const cleaned = parsed.filter(i => !isDummyUserItem(i));
-          setFavorites(cleaned);
-          localStorage.setItem('watchers_favorites', JSON.stringify(cleaned));
-        }
-      }
-
-      const savedLog = localStorage.getItem('watchers_log');
-      if (savedLog) {
-        const parsed = JSON.parse(savedLog);
-        if (Array.isArray(parsed)) {
-          const cleaned = parsed.filter(i => !isDummyUserItem(i));
-          setWatchedLog(cleaned);
-          localStorage.setItem('watchers_log', JSON.stringify(cleaned));
-        }
-      }
-
-      const savedReviews = localStorage.getItem('watchers_reviews');
-      if (savedReviews) {
-        const parsed = JSON.parse(savedReviews);
-        if (Array.isArray(parsed)) {
-          const cleaned = parsed.filter(r => !isDummyReview(r));
-          setReviews(cleaned);
-          localStorage.setItem('watchers_reviews', JSON.stringify(cleaned));
-        }
-      }
+      localStorage.removeItem('watchers_watchlist');
+      localStorage.removeItem('watchers_favorites');
+      localStorage.removeItem('watchers_log');
+      localStorage.removeItem('watchers_reviews');
     } catch {
-      // clean fallback
+      // ignore
     }
+  }, []);
 
-    // Fetch real data from Supabase
-    if (supabase) {
-      // Community reviews
-      fetchReviewsDB().then(async (dbReviews) => {
-        if (dbReviews !== null) {
-          const cleanReviews = dbReviews.filter(r => !isDummyReview(r));
-          // If user logged in, check their votes
-          if (user?.id) {
-            const userVotes = await fetchUserVotesDB(user.id);
-            setReviews(cleanReviews.map(r => ({ ...r, user_vote: userVotes[r.id] || null })));
-          } else {
-            setReviews(cleanReviews);
-          }
-          localStorage.setItem('watchers_reviews', JSON.stringify(cleanReviews));
+  // Fetch real data from Supabase
+  useEffect(() => {
+    if (!supabase) return;
+
+    // 1. Fetch community reviews
+    fetchReviewsDB().then(async (dbReviews) => {
+      if (dbReviews !== null) {
+        const cleanReviews = dbReviews.filter(r => !isDummyReview(r));
+        if (user?.id) {
+          const userVotes = await fetchUserVotesDB(user.id);
+          setReviews(cleanReviews.map(r => ({ ...r, user_vote: userVotes[r.id] || null })));
+        } else {
+          setReviews(cleanReviews);
         }
+      }
+    });
+
+    // 2. Fetch user-specific data if signed in
+    if (user?.id) {
+      fetchUserWatchlistDB(user.id).then(dbWatchlist => {
+        if (dbWatchlist) setWatchlist(dbWatchlist.filter(i => !isDummyUserItem(i)));
       });
 
-      // User specific data if logged in
-      if (user?.id) {
-        fetchUserWatchlistDB(user.id).then(dbWatchlist => {
-          if (dbWatchlist) setWatchlist(dbWatchlist.filter(i => !isDummyUserItem(i)));
-        });
+      fetchUserFavoritesDB(user.id).then(dbFavorites => {
+        if (dbFavorites) setFavorites(dbFavorites.filter(i => !isDummyUserItem(i)));
+      });
 
-        fetchUserFavoritesDB(user.id).then(dbFavorites => {
-          if (dbFavorites) setFavorites(dbFavorites.filter(i => !isDummyUserItem(i)));
-        });
-
-        fetchUserWatchedDB(user.id).then(dbWatched => {
-          if (dbWatched) setWatchedLog(dbWatched.filter(i => !isDummyUserItem(i)));
-        });
-      }
-
-      // Realtime review synchronization
-      const channel = supabase
-        .channel('realtime_reviews_channel')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'reviews' },
-          () => {
-            fetchReviewsDB().then(dbReviews => {
-              if (dbReviews !== null) {
-                const cleanReviews = dbReviews.filter(r => !isDummyReview(r));
-                setReviews(cleanReviews);
-                localStorage.setItem('watchers_reviews', JSON.stringify(cleanReviews));
-              }
-            });
-          }
-        )
-        .subscribe();
-
-      return () => {
-        if (supabase) {
-          supabase.removeChannel(channel);
-        }
-      };
+      fetchUserWatchedDB(user.id).then(dbWatched => {
+        if (dbWatched) setWatchedLog(dbWatched.filter(i => !isDummyUserItem(i)));
+      });
+    } else {
+      // Clear user data on sign out
+      setWatchlist([]);
+      setFavorites([]);
+      setWatchedLog([]);
     }
+
+    // 3. Real-time review sync via Supabase channel
+    const channel = supabase
+      .channel('realtime_reviews_channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reviews' },
+        () => {
+          fetchReviewsDB().then(async (dbReviews) => {
+            if (dbReviews !== null) {
+              const cleanReviews = dbReviews.filter(r => !isDummyReview(r));
+              if (user?.id) {
+                const userVotes = await fetchUserVotesDB(user.id);
+                setReviews(cleanReviews.map(r => ({ ...r, user_vote: userVotes[r.id] || null })));
+              } else {
+                setReviews(cleanReviews);
+              }
+            }
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (supabase) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [user?.id]);
-
-  // Sync to localStorage
-  useEffect(() => {
-    localStorage.setItem('watchers_watchlist', JSON.stringify(watchlist.filter(i => !isDummyUserItem(i))));
-  }, [watchlist]);
-
-  useEffect(() => {
-    localStorage.setItem('watchers_favorites', JSON.stringify(favorites.filter(i => !isDummyUserItem(i))));
-  }, [favorites]);
-
-  useEffect(() => {
-    localStorage.setItem('watchers_log', JSON.stringify(watchedLog.filter(i => !isDummyUserItem(i))));
-  }, [watchedLog]);
-
-  useEffect(() => {
-    localStorage.setItem('watchers_reviews', JSON.stringify(reviews.filter(r => !isDummyReview(r))));
-  }, [reviews]);
 
   const isWatchlisted = (mediaId: number, mediaType: 'movie' | 'tv') => {
     return watchlist.some(item => item.media_id === mediaId && item.media_type === mediaType);
@@ -201,7 +212,9 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     const exists = isWatchlisted(media.id, media.media_type);
     if (exists) {
-      setWatchlist(prev => prev.filter(item => !(item.media_id === media.id && item.media_type === media.media_type)));
+      setWatchlist(prev =>
+        prev.filter(item => !(item.media_id === media.id && item.media_type === media.media_type))
+      );
       if (supabase && user.id) {
         removeFromWatchlistDB(user.id, media.id, media.media_type);
       }
@@ -241,7 +254,9 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     const exists = isFavorite(media.id, media.media_type);
     if (exists) {
-      setFavorites(prev => prev.filter(item => !(item.media_id === media.id && item.media_type === media.media_type)));
+      setFavorites(prev =>
+        prev.filter(item => !(item.media_id === media.id && item.media_type === media.media_type))
+      );
       if (supabase && user.id) {
         removeFromFavoritesDB(user.id, media.id, media.media_type);
       }
@@ -280,10 +295,17 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     return watchedLog.find(item => item.media_id === mediaId && item.media_type === mediaType);
   };
 
-  const logWatched = (media: MediaItem, rating: number, watchedDate: string, reviewText?: string) => {
+  const logWatched = (
+    media: MediaItem,
+    rating: number,
+    watchedDate: string,
+    reviewText?: string
+  ) => {
     if (!user) return;
 
-    const existingIndex = watchedLog.findIndex(item => item.media_id === media.id && item.media_type === media.media_type);
+    const existingIndex = watchedLog.findIndex(
+      item => item.media_id === media.id && item.media_type === media.media_type
+    );
     const newLogItem: WatchedItem = {
       id: existingIndex >= 0 ? watchedLog[existingIndex].id : 'log_' + Date.now(),
       media_id: media.id,
@@ -342,7 +364,10 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
         upvotes: 0,
         downvotes: 0,
       };
-      setReviews(prev => [newReview, ...prev.filter(r => !(r.media_id === media.id && r.user_id === user.id))]);
+      setReviews(prev => [
+        newReview,
+        ...prev.filter(r => !(r.media_id === media.id && r.user_id === user.id)),
+      ]);
 
       if (supabase && user.id) {
         insertReviewDB({

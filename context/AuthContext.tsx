@@ -17,58 +17,53 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check localStorage for persisted real session (filter out any dummy mock user leftovers)
-    const saved = localStorage.getItem('watchers_user');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const dummyUsernames = [
-          'cinephile_alex',
-          'google_cinephile',
-          'pixel_director',
-          'sarah_watches',
-          'marcus_stream',
-          'elena_cinema',
-          'david_noir',
-          'chloe_indie',
-        ];
-        const isDummy =
-          !parsed?.id ||
-          dummyUsernames.includes(parsed?.username?.toLowerCase()) ||
-          String(parsed?.id).startsWith('usr_cinephile') ||
-          String(parsed?.id).startsWith('usr_google_') ||
-          String(parsed?.id).startsWith('usr_discord_') ||
-          String(parsed?.id).startsWith('usr_sarah') ||
-          String(parsed?.id).startsWith('usr_marcus');
-
-        if (!isDummy && parsed?.username) {
-          setUser(parsed);
-        } else {
-          localStorage.removeItem('watchers_user');
-        }
-      } catch {
-        localStorage.removeItem('watchers_user');
-      }
+    // Clean up any legacy manual localStorage user session keys
+    try {
+      localStorage.removeItem('watchers_user');
+    } catch {
+      // ignore
     }
 
-    if (supabase) {
-      supabase.auth.getSession().then(async ({ data: { session } }) => {
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Load active session from Supabase
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      try {
         if (session?.user) {
           const u = session.user;
           const metadata = u.user_metadata || {};
-          
-          // Try fetching stored profile from Supabase first
+
           const dbProfile = await fetchUserProfileDB(u.id);
           const profile: UserProfile = dbProfile || {
             id: u.id,
-            username: metadata.preferred_username || metadata.user_name || metadata.username || metadata.full_name?.toLowerCase().replace(/\s+/g, '_') || u.email?.split('@')[0] || 'watcher',
-            display_name: metadata.display_name || metadata.full_name || metadata.name || metadata.custom_claims?.global_name || 'Watcher',
-            avatar_url: metadata.avatar_url || metadata.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+            username:
+              metadata.preferred_username ||
+              metadata.user_name ||
+              metadata.username ||
+              metadata.full_name?.toLowerCase().replace(/\s+/g, '_') ||
+              u.email?.split('@')[0] ||
+              'watcher',
+            display_name:
+              metadata.display_name ||
+              metadata.full_name ||
+              metadata.name ||
+              metadata.custom_claims?.global_name ||
+              'Watcher',
+            avatar_url:
+              metadata.avatar_url ||
+              metadata.picture ||
+              'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
             bio: metadata.bio || 'Movie & TV show enthusiast on Watchers.',
-            provider: u.app_metadata?.provider === 'discord' ? 'discord' : (u.app_metadata?.provider || 'email'),
+            provider:
+              u.app_metadata?.provider === 'discord'
+                ? 'discord'
+                : u.app_metadata?.provider || 'email',
             created_at: u.created_at,
           };
 
@@ -77,22 +72,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           setUser(profile);
-          localStorage.setItem('watchers_user', JSON.stringify(profile));
+        } else {
+          setUser(null);
         }
-      });
+      } catch (err) {
+        console.warn('Error fetching Supabase session user profile:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    });
 
-      const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
         if (session?.user) {
           const u = session.user;
           const metadata = u.user_metadata || {};
           const dbProfile = await fetchUserProfileDB(u.id);
           const profile: UserProfile = dbProfile || {
             id: u.id,
-            username: metadata.preferred_username || metadata.user_name || metadata.username || metadata.full_name?.toLowerCase().replace(/\s+/g, '_') || u.email?.split('@')[0] || 'watcher',
-            display_name: metadata.display_name || metadata.full_name || metadata.name || 'Watcher',
-            avatar_url: metadata.avatar_url || metadata.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+            username:
+              metadata.preferred_username ||
+              metadata.user_name ||
+              metadata.username ||
+              metadata.full_name?.toLowerCase().replace(/\s+/g, '_') ||
+              u.email?.split('@')[0] ||
+              'watcher',
+            display_name:
+              metadata.display_name ||
+              metadata.full_name ||
+              metadata.name ||
+              'Watcher',
+            avatar_url:
+              metadata.avatar_url ||
+              metadata.picture ||
+              'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
             bio: metadata.bio || 'Movie & TV show enthusiast on Watchers.',
-            provider: u.app_metadata?.provider === 'discord' ? 'discord' : (u.app_metadata?.provider || 'email'),
+            provider:
+              u.app_metadata?.provider === 'discord'
+                ? 'discord'
+                : u.app_metadata?.provider || 'email',
             created_at: u.created_at,
           };
 
@@ -101,17 +119,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           setUser(profile);
-          localStorage.setItem('watchers_user', JSON.stringify(profile));
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
-          localStorage.removeItem('watchers_user');
         }
-      });
+      }
+    );
 
-      return () => {
-        authListener.subscription.unsubscribe();
-      };
-    }
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const loginWithEmail = async (email: string, password: string) => {
@@ -137,9 +153,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const dbProfile = await fetchUserProfileDB(u.id);
         const profile: UserProfile = dbProfile || {
           id: u.id,
-          username: metadata.preferred_username || metadata.user_name || metadata.username || u.email?.split('@')[0] || 'watcher',
-          display_name: metadata.display_name || metadata.full_name || metadata.name || 'Watcher',
-          avatar_url: metadata.avatar_url || metadata.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          username:
+            metadata.preferred_username ||
+            metadata.user_name ||
+            metadata.username ||
+            u.email?.split('@')[0] ||
+            'watcher',
+          display_name:
+            metadata.display_name ||
+            metadata.full_name ||
+            metadata.name ||
+            'Watcher',
+          avatar_url:
+            metadata.avatar_url ||
+            metadata.picture ||
+            'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
           bio: metadata.bio || 'Movie & TV show enthusiast on Watchers.',
           provider: 'email',
           created_at: u.created_at,
@@ -150,7 +178,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         setUser(profile);
-        localStorage.setItem('watchers_user', JSON.stringify(profile));
       }
     } catch (err) {
       setIsLoading(false);
@@ -197,7 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       let sessionUser = data.user;
 
-      // If auto-confirm is enabled or session is not returned yet, try direct password signin to skip verification
+      // Direct sign-in to skip verification
       if (!data.session && sessionUser) {
         try {
           const signInRes = await supabase.auth.signInWithPassword({
@@ -208,7 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             sessionUser = signInRes.data.user;
           }
         } catch {
-          // If sign in fails because confirmation is strictly enforced in project settings, sessionUser still exists
+          // Continue with sessionUser
         }
       }
 
@@ -217,7 +244,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: sessionUser.id,
           username: cleanUsername || 'watcher',
           display_name: cleanDisplayName || 'Watcher',
-          avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          avatar_url:
+            'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
           bio: 'Movie & TV show enthusiast on Watchers.',
           provider: 'email',
           created_at: sessionUser.created_at || new Date().toISOString(),
@@ -225,7 +253,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         await upsertUserProfileDB(profile);
         setUser(profile);
-        localStorage.setItem('watchers_user', JSON.stringify(profile));
       }
     } catch (err) {
       setIsLoading(false);
@@ -268,14 +295,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
     setUser(null);
-    localStorage.removeItem('watchers_user');
   };
 
   const updateProfile = async (updates: Partial<UserProfile>): Promise<boolean> => {
     if (!user) return false;
     const updated = { ...user, ...updates };
     setUser(updated);
-    localStorage.setItem('watchers_user', JSON.stringify(updated));
 
     if (supabase && user.id) {
       try {
