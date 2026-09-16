@@ -1,0 +1,22 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-outfit), system-ui, -apple-system, sans-serif;
+}
+
+/* Clean scrollbar and base typography */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for horizontal movie shelves */
+*::-webkit-scrollbar {
+  display: none;
+}
+*{
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,23 @@
+import React, { Suspense } from 'react';
+import MediaCatalog from '@/components/MediaCatalog';
+import { TV_GENRES } from '@/lib/data/genres';
+import { getPopularTV } from '@/lib/tmdb';
+
+export const revalidate = 3600;
+
+export default async function TVShowsPage() {
+  const popular = await getPopularTV();
+
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto p-8 text-center text-zinc-400">Loading TV catalog...</div>}>
+      <MediaCatalog
+        type="tv"
+        title="Explore TV Shows"
+        description="Discover prestige dramas, comedy series, sci-fi epics, and limited releases."
+        genres={TV_GENRES}
+        initialItems={popular.results}
+        totalPages={popular.total_pages || 1}
+      />
+    </Suspense>
+  );
+}
