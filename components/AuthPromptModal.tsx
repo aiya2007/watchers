@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { X, Film, Bookmark, Eye, Star, Heart, ArrowRight } from 'lucide-react';
 import { useModal } from '@/context/ModalContext';
+import {Logo} from './Logo';
 
 export default function AuthPromptModal() {
   const { isAuthPromptOpen, authPromptMessage, closeAuthPrompt } = useModal();
@@ -54,8 +55,8 @@ export default function AuthPromptModal() {
 
         {/* Header with Icon */}
         <div className="text-center space-y-3 pt-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 dark:bg-amber-400/10 text-amber-500 border border-amber-500/20 shadow-xs">
-            <Film className="w-7 h-7" />
+          <div className="inline-flex items-center justify-center w-14 h-14">
+            <Logo size={40} color='white'/>
           </div>
           <h2 id="auth-modal-title" className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
             Sign In to Weflixd

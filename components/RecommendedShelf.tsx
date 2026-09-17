@@ -51,7 +51,6 @@ export default function RecommendedShelf() {
       <section className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="space-y-1 text-center sm:text-left">
           <div className="flex items-center justify-center sm:justify-start gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500" />
             <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
               Personalized Recommendations
             </h3>

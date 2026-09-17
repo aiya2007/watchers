@@ -64,9 +64,9 @@ export default function PeopleShelf({ title, people }: PeopleShelfProps) {
           <Link
             key={person.id}
             href={`/people/${person.id}`}
-            className="group flex flex-col items-center text-center w-28 sm:w-32 flex-shrink-0"
+            className="group flex flex-col items-center justify-center text-center w-28 sm:w-32 flex-shrink-0"
           >
-            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 group-hover:border-zinc-400 dark:group-hover:border-zinc-500 transition-colors shadow-xs">
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 group-hover:border-zinc-400 dark:group-hover:border-zinc-500 transition-colors shadow-xs flex items-center justify-center">
               {person.profile_path ? (
                 <Image
                   src={person.profile_path}

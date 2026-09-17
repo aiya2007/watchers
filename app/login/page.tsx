@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Film, Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 
 export default function LoginPage() {
   const { loginWithEmail, loginWithDiscord, user } = useAuth();
@@ -77,15 +78,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-amber-500/10 text-amber-500 mb-1 border border-amber-500/20">
-            <Film className="w-6 h-6" />
+          <div className="inline-flex items-center justify-center w-14 h-14">
+            <Logo size={40} color='white' />
           </div>
           <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-            Welcome to Weflixd
+            Welcome back!
           </h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Sign in to track films, build your watchlist, and join the conversation.
-          </p>
         </div>
 
         {/* Error Alert */}

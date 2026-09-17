@@ -32,8 +32,7 @@ export default function NotificationsView() {
   if (!user) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-3">
-        <Bell className="w-8 h-8 mx-auto text-zinc-400" />
-        <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Sign in to see updates</h1>
+        <h1 className="text-xl font-regular text-zinc-900 dark:text-zinc-100">Sign in to see updates</h1>
         <p className="text-sm text-zinc-500">Follow people to keep up with their reviews and watched titles.</p>
       </div>
     );
@@ -42,11 +41,8 @@ export default function NotificationsView() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 w-full space-y-6">
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
-          <Bell className="w-5 h-5" />
-        </div>
         <div>
-          <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Notifications</h1>
+          <h1 className="text-2xl font-regular text-zinc-900 dark:text-zinc-50">Notifications</h1>
           <p className="text-sm text-zinc-500">Recent activity from people you follow.</p>
         </div>
       </div>

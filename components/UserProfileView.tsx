@@ -190,7 +190,7 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
 
   return (
     <div className="w-full pb-10">
-      <div className="relative w-full h-[280px] sm:h-[360px] lg:h-[420px] bg-zinc-200 dark:bg-zinc-950 overflow-hidden">
+      <div className="relative w-full h-[280px] bg-zinc-200 dark:bg-zinc-950 overflow-hidden">
         <Image
           src={bannerImage}
           alt={`${profileName} profile banner`}
@@ -206,48 +206,21 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 sm:-mt-24 relative z-10">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-zinc-50 dark:border-zinc-950 flex-shrink-0 bg-zinc-800 shadow-2xl">
-          <Image
-            src={avatarUrl}
-            alt={username}
-            fill
-            className="object-cover"
-            referrerPolicy="no-referrer"
-          />
+            <Image
+              src={avatarUrl}
+              alt={username}
+              fill
+              className="object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
 
-          <div className="flex-1 min-w-0 pt-16 sm:pt-14 space-y-3">
+          <div className="flex-1 min-w-0 pt-6 space-y-3">
             <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 capitalize">
-              {profileName}
-            </h1>
-            <span className="text-xs font-mono text-zinc-500">@{username}</span>
-            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
-              via {provider}
-            </span>
-
-              {isCurrentUser && (
-              <Link
-                href="/settings"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-sm font-semibold text-zinc-700 dark:text-zinc-300 transition-colors ml-auto sm:ml-2"
-              >
-                <Settings className="w-3.5 h-3.5" />
-                <span>Edit Profile</span>
-              </Link>
-              )}
-              {!isCurrentUser && authUser && (
-              <button
-                type="button"
-                onClick={handleFollow}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ml-auto sm:ml-2 ${
-                  followStats.isFollowing
-                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {followStats.isFollowing ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
-                {followStats.isFollowing ? 'Following' : 'Follow'}
-              </button>
-              )}
+              <h1 className="text-2xl sm:text-3xl font-regular tracking-tight text-zinc-900 dark:text-zinc-50 capitalize">
+                {profileName}
+              </h1>
+              <span className="text-2xl text-zinc-500">@{username}</span>
             </div>
 
             {bio ? <p className="text-sm text-zinc-600 dark:text-zinc-300 max-w-2xl">{bio}</p> : null}
@@ -257,11 +230,33 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
               <span><strong className="text-zinc-900 dark:text-zinc-100">{followStats.following}</strong> Following</span>
             </div>
           </div>
+          {isCurrentUser && (
+            <Link
+              href="/settings"
+              className="sm:mt-12 inline-flex items-center gap-2 px-4 py-2 rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-sm font-semibold text-zinc-700 dark:text-zinc-300 transition-colors ml-auto sm:ml-2"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>Edit Profile</span>
+            </Link>
+          )}
+          {!isCurrentUser && authUser && (
+            <button
+              type="button"
+              onClick={handleFollow}
+              className={`sm:mt-12 inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ml-auto sm:ml-2 ${followStats.isFollowing
+                ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+            >
+              {followStats.isFollowing ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+              {followStats.isFollowing ? 'Following' : 'Follow'}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2 overflow-x-auto no-scrollbar">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-4 overflow-x-auto no-scrollbar">
         {[
           { id: 'favorites', label: 'Favorites', icon: Heart, count: favorites.length },
           { id: 'watched', label: 'Recently Watched', icon: CheckCircle2, count: watchedLog.length },
@@ -275,11 +270,10 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as ProfileTab)}
-              className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap ${
-                isActive
-                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap ${isActive
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                }`}
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
@@ -290,7 +284,7 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
       </div>
 
       {/* Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
         {/* FAVORITES TAB */}
         {activeTab === 'favorites' && (
           <div>
@@ -321,7 +315,7 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
                         </div>
                         <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{item.title}</p>
                         <p className="text-[10px] uppercase font-bold text-zinc-500">Person</p>
-                      </Link> 
+                      </Link>
                     );
                   }
                   const mediaItem: MediaItem = {
@@ -505,9 +499,8 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
                         <button
                           type="button"
                           onClick={() => voteReview(rev.id, 'up')}
-                          className={`flex items-center gap-1 ${
-                            rev.user_vote === 'up' ? 'text-emerald-500 font-bold' : ''
-                          }`}
+                          className={`flex items-center gap-1 ${rev.user_vote === 'up' ? 'text-emerald-500 font-bold' : ''
+                            }`}
                         >
                           <ThumbsUp className="w-3.5 h-3.5" />
                           <span>{rev.upvotes}</span>
@@ -515,9 +508,8 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
                         <button
                           type="button"
                           onClick={() => voteReview(rev.id, 'down')}
-                          className={`flex items-center gap-1 ${
-                            rev.user_vote === 'down' ? 'text-rose-500 font-bold' : ''
-                          }`}
+                          className={`flex items-center gap-1 ${rev.user_vote === 'down' ? 'text-rose-500 font-bold' : ''
+                            }`}
                         >
                           <ThumbsDown className="w-3.5 h-3.5" />
                           <span>{rev.downvotes}</span>
