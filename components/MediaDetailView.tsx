@@ -116,7 +116,7 @@ export default function MediaDetailView({ media }: MediaDetailViewProps) {
       {/* Main Container Overlapping Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-40 sm:-mt-52 relative z-10 space-y-10">
         {/* Header Block: Poster + Metadata + Actions */}
-        <div className="flex flex-col md:flex-row gap-8 items-start">
+        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
           {/* Poster */}
           <div className="relative w-44 sm:w-56 md:w-64 aspect-[2/3] rounded-xl overflow-hidden border-2 border-white dark:border-zinc-800 shadow-2xl flex-shrink-0 bg-zinc-100 dark:bg-zinc-900">
             {media.poster_path ? (

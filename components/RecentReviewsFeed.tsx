@@ -14,7 +14,7 @@ export default function RecentReviewsFeed() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Community Reviews & Ratings
+            Recent Reviews From The Community
           </h2>
           <p className="text-xs text-zinc-500">
             Fresh takes, critiques, and logs from film and TV watchers

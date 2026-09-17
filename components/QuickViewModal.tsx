@@ -148,7 +148,7 @@ export default function QuickViewModal() {
                 )}
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-50 mt-1 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-regular text-zinc-900 dark:text-zinc-50 mt-1 tracking-tight">
                 {quickViewItem.title}
               </h2>
 

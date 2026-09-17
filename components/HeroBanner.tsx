@@ -49,7 +49,7 @@ export default function HeroBanner({ items }: HeroBannerProps) {
       id="homepage-hero-banner"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative w-full h-[90vh] overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white select-none transition-colors duration-200"
+      className="relative w-full h-[50vh] md:h-[90vh] overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white select-none transition-colors duration-200"
     >
       {/* Background Backdrops with Crossfade Animation */}
       <AnimatePresence mode="wait">
@@ -88,28 +88,31 @@ export default function HeroBanner({ items }: HeroBannerProps) {
             >
               Trending Now
             </span>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-regular tracking-tight leading-tight text-zinc-900 dark:text-white">
+            {currentItem.title}
+          </h1>
+
+          <div className="flex items-center gap-3">
             <span className="text-xs uppercase font-semibold px-2 py-0.5 rounded bg-zinc-900/10 dark:bg-white/10 backdrop-blur-sm text-zinc-700 dark:text-zinc-300">
               {currentItem.media_type === 'movie' ? 'Movie' : 'TV Series'}
             </span>
-            {year && <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">{year}</span>}
             <div
               className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/70 dark:bg-black/40 border border-zinc-200 dark:border-white/10 backdrop-blur-sm text-xs font-semibold text-zinc-800 dark:text-zinc-100"
               title="TMDB Rating"
             >
-              <span className="text-[10px] font-black uppercase tracking-wider px-1 py-0.2 rounded bg-amber-500 text-zinc-950">
+              <span className="text-[10px] font-black uppercase tracking-wider px-1 py-0.2 rounded text-blue-500">
                 TMDB
               </span>
-              <div className="flex items-center gap-1 text-amber-500 dark:text-amber-400">
-                <Star className="w-3.5 h-3.5 fill-amber-500 dark:fill-amber-400" />
+              <div className="flex items-center gap-1 text-blue-500 dark:text-blue-400">
+                <Star className="w-3.5 h-3.5 fill-blue-500 dark:fill-blue-400" />
                 <span>{ratingOutOfFive} / 5</span>
               </div>
             </div>
+            {year && <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">{year}</span>}
           </div>
-
-          {/* Title */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-zinc-900 dark:text-white">
-            {currentItem.title}
-          </h1>
 
           {/* Tagline / Overview */}
           <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-300 line-clamp-3 leading-relaxed max-w-xl">
@@ -127,7 +130,7 @@ export default function HeroBanner({ items }: HeroBannerProps) {
               style={{ backgroundColor: palette.dominant }}
             >
               <Eye className="w-4 h-4" />
-              <span>Quick View</span>
+              <span>Learn More</span>
             </button>
 
             {/* Watch Trailer */}
@@ -167,15 +170,6 @@ export default function HeroBanner({ items }: HeroBannerProps) {
                 {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
               </span>
             </button>
-
-            {/* View Full Page */}
-            <Link
-              href={detailLink}
-              id="hero-details-link"
-              className="px-4 py-2.5 text-sm font-semibold text-zinc-600 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white transition-colors"
-            >
-              Details & Reviews →
-            </Link>
           </div>
         </div>
 

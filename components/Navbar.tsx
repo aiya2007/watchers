@@ -10,6 +10,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useModal } from '@/context/ModalContext';
 import { MOVIE_GENRES, TV_GENRES, COUNTRIES } from '@/lib/data/genres';
 import { MediaItem } from '@/lib/types';
+import {Logo} from '@/components/Logo';
 
 export default function Navbar() {
   const router = useRouter();
@@ -75,7 +76,7 @@ export default function Navbar() {
               id="brand-logo"
               className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 hover:opacity-90 transition-opacity"
             >
-              Weflixd
+              <Logo size={40} color='white'/>
             </Link>
 
             {/* Desktop Navigation */}
@@ -176,25 +177,6 @@ export default function Navbar() {
                   title="Notifications"
                 >
                   <Bell className="w-5 h-5" />
-                </Link>
-                {/* Favorites Heart Icon */}
-                <Link
-                  href={`/profile/${user.username}?tab=favorites`}
-                  id="nav-favorites"
-                  className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                  title="Favorites"
-                >
-                  <Heart className="w-5 h-5" />
-                </Link>
-
-                {/* Watchlist Bookmark Icon */}
-                <Link
-                  href={`/profile/${user.username}?tab=watchlist`}
-                  id="nav-watchlist"
-                  className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                  title="Watchlist"
-                >
-                  <Bookmark className="w-5 h-5" />
                 </Link>
 
                 {/* Profile Picture with Dropdown */}

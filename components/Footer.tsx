@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Logo } from '@/components/Logo';
 
 export default function Footer() {
   return (
@@ -10,8 +11,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
           {/* Brand & Mission */}
           <div className="md:col-span-2 space-y-3">
-            <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-              Weflixd
+            <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 mb-5 flex items-center gap-2">
+              <Logo size={40} color='white'/> Weflixd.live
             </span>
             <p className="text-xs leading-relaxed max-w-sm text-zinc-500 dark:text-zinc-400">
               The social cinema platform for film & television lovers. Track what you watch, save to your watchlist, rate out of five, and read reviews from the community.
@@ -20,7 +21,7 @@ export default function Footer() {
 
           {/* Quick Navigation */}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
+            <h4 className="text-xs mb-5 font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
               Explore
             </h4>
             <ul className="space-y-1.5 text-xs">
@@ -44,16 +45,21 @@ export default function Footer() {
                   People & Cast
                 </Link>
               </li>
+              <li>
+                <Link href="/people" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
+                  Site
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* API Attributions & Credits */}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
+            <h4 className="text-xs mb-5 font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
               Data & API Credits
             </h4>
             <div className="space-y-2 text-xs text-zinc-500">
-              <div className="p-2.5 rounded bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="">
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mb-0.5">
                   The Movie Database (TMDB)
                 </p>
@@ -62,7 +68,7 @@ export default function Footer() {
                 </p>
               </div>
 
-              <div className="p-2.5 rounded bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="">
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mb-0.5">
                   JustWatch
                 </p>
@@ -75,11 +81,15 @@ export default function Footer() {
         </div>
 
         {/* Bottom copyright & tech details */}
-        <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-3">
+        <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 md:flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-3">
           <p>© {new Date().getFullYear()} Weflixd. Built for film lovers worldwide.</p>
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              Built with 😡 and NextJS by @emjjkk & @aiya2007
+          <div className="md:flex items-center gap-4 mb-1">
+            <span className="flex items-center gap-1 mb-1">
+              Built with 😡 and NextJS by <a href="https://emjjkk.tech" target="_blank" rel="noopener noreferrer">@emjjkk</a> & <a href="https://github.com/aiya2007" target="_blank" rel="noopener noreferrer">@aiya2007</a>
+            </span>
+            <span className="flex items-center gap-1.5 mb-1">
+              <a href="https://www.justwatch.com/fr/JustWatch-Streaming-API" target="_blank" rel="noopener noreferrer"><img src="https://lever-client-logos.s3.us-west-2.amazonaws.com/6676c2c2-edaa-4d6b-9c25-8125143c5f13-1609679735246.png" alt="justwatch" className="w-auto h-5" /></a>
+              <a href="https://developer.themoviedb.org/docs/getting-started" target="_blank" rel="noopener noreferrer"><img src="https://www.szvisj.com/uploads/allimg/200415/2-200415092044.png" alt="TMDB" className="h-5 w-18 object-cover" /></a>
             </span>
           </div>
         </div>
