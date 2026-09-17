@@ -179,10 +179,10 @@ export default function QuickViewModal() {
                 {/* Site Community Rating */}
                 <div
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700"
-                  title="Watchers Member Rating"
+                  title="Weflixd Member Rating"
                 >
                   <span className="text-[10px] font-black uppercase tracking-wider px-1 py-0.5 rounded bg-blue-500 text-white">
-                    Watchers
+                    Weflixd
                   </span>
                   {siteAverage ? (
                     <div className="flex items-center gap-1 text-blue-500 dark:text-blue-400 font-bold text-xs">

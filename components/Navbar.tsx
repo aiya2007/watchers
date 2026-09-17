@@ -75,7 +75,7 @@ export default function Navbar() {
               id="brand-logo"
               className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 hover:opacity-90 transition-opacity"
             >
-              Watchers
+              Weflixd
             </Link>
 
             {/* Desktop Navigation */}
@@ -146,7 +146,7 @@ export default function Navbar() {
               type="button"
               onClick={openSearch}
               className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
-              title="Search Watchers"
+                title="Search Weflixd"
             >
               <Search className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
               <span className="hidden sm:inline">Search movies, TV, people...</span>

@@ -201,7 +201,7 @@ export default function SearchOverlay() {
           {!isSearching && !query.trim() && (
             <div className="py-10 text-center space-y-2">
               <p className="text-zinc-600 dark:text-zinc-300 text-sm font-medium">
-                Search Watchers
+                Search Weflixd
               </p>
               <p className="text-xs text-zinc-400 max-w-sm mx-auto">
                 Find movies, TV series, actors, directors, member profiles, and reviews.

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Outfit } from 'next/font/google';
+import { Outfit, Geist } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
@@ -14,25 +14,25 @@ import TrailerModal from '@/components/TrailerModal';
 import SocialShareModal from '@/components/SocialShareModal';
 import AuthPromptModal from '@/components/AuthPromptModal';
 
-const outfit = Outfit({
+const outfit = Geist({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-outfit',
 });
 
 export const metadata: Metadata = {
-  title: 'Watchers - Movie & TV Show Reviews, Watchlists, & Social Diary',
+  title: 'Weflixd - Movie & TV Show Reviews, Watchlists, & Social Diary',
   description:
     'A modern movie and TV show search, review, social logging, and recommendation platform.',
   openGraph: {
-    title: 'Watchers - Movie & TV Show Reviews, Watchlists, & Social Diary',
+    title: 'Weflixd - Movie & TV Show Reviews, Watchlists, & Social Diary',
     description:
       'A modern movie and TV show search, review, social logging, and recommendation platform.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Watchers - Movie & TV Show Reviews, Watchlists, & Social Diary',
+    title: 'Weflixd - Movie & TV Show Reviews, Watchlists, & Social Diary',
     description:
       'A modern movie and TV show search, review, social logging, and recommendation platform.',
   },

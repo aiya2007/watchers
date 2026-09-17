@@ -1,5 +1,5 @@
 -- ==============================================================================
--- WATCHERS: COMPLETE SUPABASE DATABASE MIGRATION & SCHEMA
+-- WEFLIXD: COMPLETE SUPABASE DATABASE MIGRATION & SCHEMA
 -- Supports: Profiles, Watched Diary, Watchlist, Favorites, Reviews & Voting
 -- Real-time enabled, Row Level Security (RLS) configured, and Triggers included
 -- ==============================================================================
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   display_name TEXT,
   avatar_url TEXT,
   banner_image TEXT,
-  bio TEXT DEFAULT 'Cinema explorer on Watchers.',
+  bio TEXT DEFAULT 'Cinema explorer on Weflixd.',
   provider TEXT DEFAULT 'google',
   created_at TIMESTAMPTZ DEFAULT timezone('utc'::TEXT, NOW()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::TEXT, NOW()) NOT NULL
@@ -265,7 +265,7 @@ BEGIN
     ),
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', 'Watcher'),
     COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'),
-    'Cinema explorer on Watchers.',
+    'Cinema explorer on Weflixd.',
     COALESCE(NEW.raw_app_meta_data->>'provider', 'google')
   )
   ON CONFLICT (id) DO UPDATE SET

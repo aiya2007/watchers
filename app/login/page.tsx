@@ -81,7 +81,7 @@ export default function LoginPage() {
             <Film className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-            Welcome to Watchers
+            Welcome to Weflixd
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Sign in to track films, build your watchlist, and join the conversation.
