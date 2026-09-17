@@ -44,7 +44,7 @@ export default function TrailerModal() {
         <div className="relative w-full aspect-video">
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&rel=0`}
-            title="Watchers Trailer Player"
+            title="Weflixd Trailer Player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="w-full h-full border-0"

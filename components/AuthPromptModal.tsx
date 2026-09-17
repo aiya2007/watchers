@@ -58,7 +58,7 @@ export default function AuthPromptModal() {
             <Film className="w-7 h-7" />
           </div>
           <h2 id="auth-modal-title" className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-            Sign In to Watchers
+            Sign In to Weflixd
           </h2>
           <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
             {authPromptMessage ||

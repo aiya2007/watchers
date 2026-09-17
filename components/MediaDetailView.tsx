@@ -187,12 +187,12 @@ export default function MediaDetailView({ media }: MediaDetailViewProps) {
                 className="flex items-center gap-2 bg-white/80 hover:bg-white dark:bg-black/50 dark:hover:bg-black/70 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-white/15 backdrop-blur-sm transition-colors group cursor-pointer shadow-xs"
                 title={
                   siteAverage
-                    ? `Watchers Community Rating: ${siteAverage} / 5 based on ${ratedReviews.length} member reviews`
-                    : 'No member reviews on Watchers yet. Click to rate!'
+                    ? `Weflixd Community Rating: ${siteAverage} / 5 based on ${ratedReviews.length} member reviews`
+                    : 'No member reviews on Weflixd yet. Click to rate!'
                 }
               >
                 <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">
-                  Watchers
+                  Weflixd
                 </span>
                 {siteAverage ? (
                   <>
@@ -549,7 +549,7 @@ export default function MediaDetailView({ media }: MediaDetailViewProps) {
                 )}
               </div>
               <p className="text-xs text-zinc-500">
-                {reviews.length} member review{reviews.length === 1 ? '' : 's'} on Watchers
+                {reviews.length} member review{reviews.length === 1 ? '' : 's'} on Weflixd
               </p>
             </div>
 

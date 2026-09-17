@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Brand & Mission */}
           <div className="md:col-span-2 space-y-3">
             <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-              Watchers
+              Weflixd
             </span>
             <p className="text-xs leading-relaxed max-w-sm text-zinc-500 dark:text-zinc-400">
               The social cinema platform for film & television lovers. Track what you watch, save to your watchlist, rate out of five, and read reviews from the community.
@@ -76,7 +76,7 @@ export default function Footer() {
 
         {/* Bottom copyright & tech details */}
         <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-3">
-          <p>© {new Date().getFullYear()} Watchers. Built for film lovers worldwide.</p>
+          <p>© {new Date().getFullYear()} Weflixd. Built for film lovers worldwide.</p>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
               Built with 😡 and NextJS by @emjjkk & @aiya2007

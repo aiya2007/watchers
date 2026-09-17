@@ -94,7 +94,7 @@ export default function SignUpPage() {
             Create Your Account
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Join the Watchers community. Instant signup with no email verification required.
+            Join the Weflixd community. Instant signup with no email verification required.
           </p>
         </div>
 

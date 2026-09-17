@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               metadata.avatar_url ||
               metadata.picture ||
               'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-            bio: metadata.bio || 'Movie & TV show enthusiast on Watchers.',
+            bio: metadata.bio || 'Movie & TV show enthusiast on Weflixd.',
             provider:
               u.app_metadata?.provider === 'discord'
                 ? 'discord'
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               metadata.avatar_url ||
               metadata.picture ||
               'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-            bio: metadata.bio || 'Movie & TV show enthusiast on Watchers.',
+            bio: metadata.bio || 'Movie & TV show enthusiast on Weflixd.',
             provider:
               u.app_metadata?.provider === 'discord'
                 ? 'discord'
@@ -168,7 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             metadata.avatar_url ||
             metadata.picture ||
             'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-          bio: metadata.bio || 'Movie & TV show enthusiast on Watchers.',
+          bio: metadata.bio || 'Movie & TV show enthusiast on Weflixd.',
           provider: 'email',
           created_at: u.created_at,
         };
@@ -246,7 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           display_name: cleanDisplayName || 'Watcher',
           avatar_url:
             'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-          bio: 'Movie & TV show enthusiast on Watchers.',
+          bio: 'Movie & TV show enthusiast on Weflixd.',
           provider: 'email',
           created_at: sessionUser.created_at || new Date().toISOString(),
         };

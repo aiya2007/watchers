@@ -14,7 +14,7 @@ export default function SocialShareModal() {
     ? `${window.location.origin}/${shareItem.media_type}/${shareItem.id}`
     : `https://watchers.app/${shareItem.media_type}/${shareItem.id}`;
 
-  const text = `Check out ${shareItem.title} on Watchers!`;
+  const text = `Check out ${shareItem.title} on Weflixd!`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(url);

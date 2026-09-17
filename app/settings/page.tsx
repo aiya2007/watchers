@@ -524,7 +524,7 @@ export default function SettingsPage() {
                 maxLength={250}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell the Watchers community about your taste in films, favorite directors, or current cinema watchlist..."
+                placeholder="Tell the Weflixd community about your taste in films, favorite directors, or current cinema watchlist..."
                 className="w-full p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/60 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 focus:bg-white dark:focus:bg-zinc-900 transition-all resize-none"
               />
             </div>

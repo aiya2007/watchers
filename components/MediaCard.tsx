@@ -24,9 +24,27 @@ export default function MediaCard({ media, className = '', showQuickViewOnClick 
   const year = (media.release_date || media.first_air_date || '').slice(0, 4);
   const ratingOutOfFive = (media.vote_average / 2).toFixed(1);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     if (showQuickViewOnClick) {
       e.preventDefault();
+      if (media.overview) {
+        openQuickView(media);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/tmdb/${media.media_type}/${media.id}`);
+        if (response.ok) {
+          const detailedMedia = (await response.json()) as MediaItem | null;
+          if (detailedMedia) {
+            openQuickView(detailedMedia);
+            return;
+          }
+        }
+      } catch {
+        // Open the saved summary if the detail request is unavailable.
+      }
+
       openQuickView(media);
     }
   };

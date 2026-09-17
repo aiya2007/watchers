@@ -123,7 +123,7 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
       <div className="max-w-md mx-auto my-20 p-8 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-center space-y-4 shadow-xs">
         <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Member Not Found</h2>
         <p className="text-xs text-zinc-500">
-          The member <span className="font-semibold text-zinc-700 dark:text-zinc-300">@{username}</span> has not created a profile on Watchers yet.
+          The member <span className="font-semibold text-zinc-700 dark:text-zinc-300">@{username}</span> has not created a profile on Weflixd yet.
         </p>
         <div className="pt-2">
           <Link
@@ -321,7 +321,7 @@ export default function UserProfileView({ username }: UserProfileViewProps) {
                         </div>
                         <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{item.title}</p>
                         <p className="text-[10px] uppercase font-bold text-zinc-500">Person</p>
-                      </Link>
+                      </Link> 
                     );
                   }
                   const mediaItem: MediaItem = {
